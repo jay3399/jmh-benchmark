@@ -1,6 +1,7 @@
 package jmh;
 
 import java.util.concurrent.TimeUnit;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -23,6 +24,46 @@ public class Sample {
   @Benchmark
   public long sequentialSum() {
     return Stream.iterate(1L, i -> i + 1).limit(N).reduce(0L, Long::sum);
+  }
+
+//  @Benchmark
+//  public long parallelSum() {
+//   return Stream.iterate(1L, i -> i + 1).limit(N).parallel().reduce(0L, Long::sum);
+//  }
+
+
+  @Benchmark
+  public long rangedSum() {
+    return LongStream.rangeClosed(1, N).reduce(0L, Long::sum);
+  }
+
+
+  @Benchmark
+  public long rangedSumWithParallel() {
+    return LongStream.rangeClosed(1, N).parallel().reduce(0L, Long::sum);
+  }
+
+
+  @Benchmark
+  public long sideEffectSum(long n) {
+    Accumlator accumlator = new Accumlator();
+    LongStream.rangeClosed(1, N).parallel().forEach(accumlator::add);
+    return accumlator.total;
+  }
+
+
+
+
+  @Benchmark
+  public long basicSum() {
+    long result = 0L;
+
+    for (Long i = 1L; i < N; i++) {
+       result += i;
+    }
+
+    return result;
+
   }
 
 
